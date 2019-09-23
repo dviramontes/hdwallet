@@ -35,6 +35,7 @@ import {
   BTCWalletInfo,
   ETHWalletInfo,
 } from '@shapeshiftoss/hdwallet-core'
+import manager from '@ledgerhq/live-common/lib/manager'
 import { handleError } from './utils'
 import * as Btc from './bitcoin'
 import * as Eth from './ethereum'
@@ -64,7 +65,7 @@ export class LedgerHDWalletInfo implements HDWalletInfo, BTCWalletInfo, ETHWalle
     return Btc.btcSupportsCoin(coin)
   }
 
-  public async btcSupportsScriptType (coin: Coin, scriptType: BTCInputScriptType): Promise<boolean> { 
+  public async btcSupportsScriptType (coin: Coin, scriptType: BTCInputScriptType): Promise<boolean> {
     return Btc.btcSupportsScriptType(coin, scriptType)
   }
 
@@ -157,8 +158,27 @@ export class LedgerHDWallet implements HDWallet, BTCWallet, ETHWallet {
     return 'Ledger'
   }
 
-  public async getModel (): Promise<string> {
-    return
+  public async getModel(): Promise<string> {
+    // TODO: move getFirmwareVersion call here
+    console.log('got here....')
+    try {
+      // TODO: figure out to get deviceInfo for device
+      const version = await manager.getLatestFirmwareForDevice({
+        isBootloader: false,
+        isOSU: false,
+        majMin: '1.5',
+        managerAllowed: true,
+        mcuVersion: '1.7',
+        pinValidated: true,
+        providerId: 1,
+        targetId: 823132164,
+        version: '1.5.5'
+      })
+      return version
+    } catch (e) {
+      console.log({ e })
+      return e.message
+    }
   }
 
   public async getLabel (): Promise<string> {
@@ -289,7 +309,7 @@ export class LedgerHDWallet implements HDWallet, BTCWallet, ETHWallet {
     return this.info.btcSupportsCoin(coin)
   }
 
-  public async btcSupportsScriptType (coin: Coin, scriptType: BTCInputScriptType): Promise<boolean> { 
+  public async btcSupportsScriptType (coin: Coin, scriptType: BTCInputScriptType): Promise<boolean> {
     return this.info.btcSupportsScriptType(coin, scriptType)
   }
 
